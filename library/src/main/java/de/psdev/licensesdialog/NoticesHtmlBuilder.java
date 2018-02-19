@@ -16,10 +16,11 @@
 
 package de.psdev.licensesdialog;
 
+import android.content.Context;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import android.content.Context;
 import de.psdev.licensesdialog.licenses.License;
 import de.psdev.licensesdialog.model.Notice;
 import de.psdev.licensesdialog.model.Notices;
@@ -32,6 +33,7 @@ public final class NoticesHtmlBuilder {
     private Notice mNotice;
     private String mStyle;
     private boolean mShowFullLicenseText;
+    private boolean mEnableLink;
 
     public static NoticesHtmlBuilder create(final Context context) {
         return new NoticesHtmlBuilder(context);
@@ -41,6 +43,7 @@ public final class NoticesHtmlBuilder {
         mContext = context;
         mStyle = context.getResources().getString(R.string.notices_default_style);
         mShowFullLicenseText = false;
+        mEnableLink = true;
     }
 
     public NoticesHtmlBuilder setNotices(final Notices notices) {
@@ -65,6 +68,11 @@ public final class NoticesHtmlBuilder {
         return this;
     }
 
+    public NoticesHtmlBuilder setEnableLink(final boolean enableLink) {
+        mEnableLink = enableLink;
+        return this;
+    }
+
     public String build() {
         final StringBuilder noticesHtmlBuilder = new StringBuilder(500);
         appendNoticesContainerStart(noticesHtmlBuilder);
@@ -85,17 +93,23 @@ public final class NoticesHtmlBuilder {
 
     private void appendNoticesContainerStart(final StringBuilder noticesHtmlBuilder) {
         noticesHtmlBuilder.append("<!DOCTYPE html><html><head>")
-            .append("<style type=\"text/css\">").append(mStyle).append("</style>")
-            .append("</head><body>");
+                .append("<style type=\"text/css\">").append(mStyle).append("</style>")
+                .append("</head><body>");
     }
 
     private void appendNoticeBlock(final StringBuilder noticesHtmlBuilder, final Notice notice) {
         noticesHtmlBuilder.append("<ul><li>").append(notice.getName());
         final String currentNoticeUrl = notice.getUrl();
         if (currentNoticeUrl != null && currentNoticeUrl.length() > 0) {
-            noticesHtmlBuilder.append(" (")
-                .append(currentNoticeUrl)
-                .append(")");
+            noticesHtmlBuilder.append(" (");
+            if (mEnableLink) {
+                noticesHtmlBuilder.append("<a href=\"").append(currentNoticeUrl).append("\" target=\"_blank\">");
+            }
+            noticesHtmlBuilder.append(currentNoticeUrl);
+            if (mEnableLink) {
+                noticesHtmlBuilder.append("</a>");
+            }
+            noticesHtmlBuilder.append(")");
         }
         noticesHtmlBuilder.append("</li></ul>");
         noticesHtmlBuilder.append("<pre>");

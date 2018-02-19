@@ -39,6 +39,7 @@ public class LicensesDialogFragment extends DialogFragment {
     private static final String ARGUMENT_NOTICES_XML_ID = "ARGUMENT_NOTICES_XML_ID";
     private static final String ARGUMENT_INCLUDE_OWN_LICENSE = "ARGUMENT_INCLUDE_OWN_LICENSE";
     private static final String ARGUMENT_FULL_LICENSE_TEXT = "ARGUMENT_FULL_LICENSE_TEXT";
+    private static final String ARGUMENT_ENABLE_LINK = "ARGUMENT_ENABLE_LINK";
     private static final String ARGUMENT_THEME_XML_ID = "ARGUMENT_THEME_XML_ID";
     private static final String ARGUMENT_DIVIDER_COLOR = "ARGUMENT_DIVIDER_COLOR";
     private static final String ARGUMENT_USE_APPCOMPAT = "ARGUMENT_USE_APPCOMPAT";
@@ -64,6 +65,7 @@ public class LicensesDialogFragment extends DialogFragment {
 
     private static LicensesDialogFragment newInstance(final Notices notices,
                                                       final boolean showFullLicenseText,
+                                                      final boolean enableLink,
                                                       final boolean includeOwnLicense,
                                                       final String noticeStyle,
                                                       final int themeResourceId,
@@ -73,6 +75,7 @@ public class LicensesDialogFragment extends DialogFragment {
         final Bundle args = new Bundle();
         args.putParcelable(ARGUMENT_NOTICES, notices);
         args.putBoolean(ARGUMENT_FULL_LICENSE_TEXT, showFullLicenseText);
+        args.putBoolean(ARGUMENT_ENABLE_LINK, enableLink);
         args.putBoolean(ARGUMENT_INCLUDE_OWN_LICENSE, includeOwnLicense);
         args.putString(ARGUMENT_NOTICE_STYLE, noticeStyle);
         args.putInt(ARGUMENT_THEME_XML_ID, themeResourceId);
@@ -84,6 +87,7 @@ public class LicensesDialogFragment extends DialogFragment {
 
     private static LicensesDialogFragment newInstance(final int rawNoticesResourceId,
                                                       final boolean showFullLicenseText,
+                                                      final boolean enableLink,
                                                       final boolean includeOwnLicense,
                                                       final String noticeStyle,
                                                       final int themeResourceId,
@@ -93,6 +97,7 @@ public class LicensesDialogFragment extends DialogFragment {
         final Bundle args = new Bundle();
         args.putInt(ARGUMENT_NOTICES_XML_ID, rawNoticesResourceId);
         args.putBoolean(ARGUMENT_FULL_LICENSE_TEXT, showFullLicenseText);
+        args.putBoolean(ARGUMENT_ENABLE_LINK, enableLink);
         args.putBoolean(ARGUMENT_INCLUDE_OWN_LICENSE, includeOwnLicense);
         args.putString(ARGUMENT_NOTICE_STYLE, noticeStyle);
         args.putInt(ARGUMENT_THEME_XML_ID, themeResourceId);
@@ -146,6 +151,7 @@ public class LicensesDialogFragment extends DialogFragment {
                         notices.getNotices().add(LicensesDialog.LICENSES_DIALOG_NOTICE);
                     }
                     final boolean showFullLicenseText = arguments.getBoolean(ARGUMENT_FULL_LICENSE_TEXT, false);
+                    final boolean enableLink = arguments.getBoolean(ARGUMENT_ENABLE_LINK, true);
                     if (arguments.containsKey(ARGUMENT_THEME_XML_ID)) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                             mThemeResourceId = arguments.getInt(ARGUMENT_THEME_XML_ID, android.R.style.Theme_DeviceDefault_Light_Dialog);
@@ -164,7 +170,7 @@ public class LicensesDialogFragment extends DialogFragment {
                     if (noticeStyle == null) {
                         noticeStyle = resources.getString(R.string.notices_default_style);
                     }
-                    mLicensesText = NoticesHtmlBuilder.create(getActivity()).setNotices(notices).setShowFullLicenseText(showFullLicenseText).setStyle(noticeStyle).build();
+                    mLicensesText = NoticesHtmlBuilder.create(getActivity()).setNotices(notices).setShowFullLicenseText(showFullLicenseText).setEnableLink(enableLink).setStyle(noticeStyle).build();
                 } else {
                     throw new IllegalStateException("Missing arguments");
                 }
@@ -191,9 +197,9 @@ public class LicensesDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
         final LicensesDialog.Builder builder = new LicensesDialog.Builder(getActivity())
-            .setNotices(mLicensesText)
-            .setTitle(mTitleText).setCloseText(mCloseButtonText)
-            .setThemeResourceId(mThemeResourceId).setDividerColor(mDividerColor);
+                .setNotices(mLicensesText)
+                .setTitle(mTitleText).setCloseText(mCloseButtonText)
+                .setThemeResourceId(mThemeResourceId).setDividerColor(mDividerColor);
         final LicensesDialog licensesDialog = builder.build();
         if (getArguments().getBoolean(ARGUMENT_USE_APPCOMPAT, false)) {
             return licensesDialog.createAppCompat();
@@ -249,6 +255,7 @@ public class LicensesDialogFragment extends DialogFragment {
         private Notices mNotices;
         private Integer mRawNoticesResourceId;
         private boolean mShowFullLicenseText;
+        private boolean mEnableLink;
         private boolean mIncludeOwnLicense;
         private String mNoticesStyle;
         private int mThemeResourceId;
@@ -263,6 +270,7 @@ public class LicensesDialogFragment extends DialogFragment {
             mContext = context;
             // Set default values
             mShowFullLicenseText = false;
+            mEnableLink = true;
             mIncludeOwnLicense = true;
             mNoticesStyle = context.getString(R.string.notices_default_style);
             mThemeResourceId = 0;
@@ -292,6 +300,11 @@ public class LicensesDialogFragment extends DialogFragment {
 
         public Builder setShowFullLicenseText(final boolean showFullLicenseText) {
             mShowFullLicenseText = showFullLicenseText;
+            return this;
+        }
+
+        public Builder setEnableLink(final boolean enableLink) {
+            mEnableLink = enableLink;
             return this;
         }
 
@@ -332,9 +345,9 @@ public class LicensesDialogFragment extends DialogFragment {
 
         public LicensesDialogFragment build() {
             if (mNotices != null) {
-                return newInstance(mNotices, mShowFullLicenseText, mIncludeOwnLicense, mNoticesStyle, mThemeResourceId, mDividerColor, mUseAppCompat);
+                return newInstance(mNotices, mShowFullLicenseText, mEnableLink, mIncludeOwnLicense, mNoticesStyle, mThemeResourceId, mDividerColor, mUseAppCompat);
             } else if (mRawNoticesResourceId != null) {
-                return newInstance(mRawNoticesResourceId, mShowFullLicenseText, mIncludeOwnLicense, mNoticesStyle, mThemeResourceId, mDividerColor, mUseAppCompat);
+                return newInstance(mRawNoticesResourceId, mShowFullLicenseText, mEnableLink, mIncludeOwnLicense, mNoticesStyle, mThemeResourceId, mDividerColor, mUseAppCompat);
             } else {
                 throw new IllegalStateException("Required parameter not set. You need to call setNotices.");
             }

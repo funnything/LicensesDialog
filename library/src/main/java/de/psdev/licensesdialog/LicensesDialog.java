@@ -16,10 +16,6 @@
 
 package de.psdev.licensesdialog;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -32,14 +28,19 @@ import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import de.psdev.licensesdialog.licenses.ApacheSoftwareLicense20;
 import de.psdev.licensesdialog.model.Notice;
 import de.psdev.licensesdialog.model.Notices;
 
 public class LicensesDialog {
     public static final Notice LICENSES_DIALOG_NOTICE = new Notice("LicensesDialog", "http://psdev.de/LicensesDialog",
-        "Copyright 2013-2016 Philip Schiffer",
-        new ApacheSoftwareLicense20());
+            "Copyright 2013-2016 Philip Schiffer",
+            new ApacheSoftwareLicense20());
 
     private final Context mContext;
     private final String mTitleText;
@@ -85,12 +86,12 @@ public class LicensesDialog {
             builder = new AlertDialog.Builder(mContext);
         }
         builder.setTitle(mTitleText)
-            .setView(webView)
-            .setPositiveButton(mCloseText, new Dialog.OnClickListener() {
-                public void onClick(final DialogInterface dialogInterface, final int i) {
-                    dialogInterface.dismiss();
-                }
-            });
+                .setView(webView)
+                .setPositiveButton(mCloseText, new Dialog.OnClickListener() {
+                    public void onClick(final DialogInterface dialogInterface, final int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
         final AlertDialog dialog = builder.create();
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
@@ -127,12 +128,12 @@ public class LicensesDialog {
             builder = new android.support.v7.app.AlertDialog.Builder(mContext);
         }
         builder.setTitle(mTitleText)
-            .setView(webView)
-            .setPositiveButton(mCloseText, new Dialog.OnClickListener() {
-                public void onClick(final DialogInterface dialogInterface, final int i) {
-                    dialogInterface.dismiss();
-                }
-            });
+                .setView(webView)
+                .setPositiveButton(mCloseText, new Dialog.OnClickListener() {
+                    public void onClick(final DialogInterface dialogInterface, final int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
         final android.support.v7.app.AlertDialog dialog = builder.create();
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
@@ -206,14 +207,14 @@ public class LicensesDialog {
         }
     }
 
-    private static String getLicensesText(final Context context, final Notices notices, final boolean showFullLicenseText,
+    private static String getLicensesText(final Context context, final Notices notices, final boolean showFullLicenseText, final boolean enableLink,
                                           final boolean includeOwnLicense, final String style) {
         try {
             if (includeOwnLicense) {
                 final List<Notice> noticeList = notices.getNotices();
                 noticeList.add(LICENSES_DIALOG_NOTICE);
             }
-            return NoticesHtmlBuilder.create(context).setShowFullLicenseText(showFullLicenseText).setNotices(notices).setStyle(style).build();
+            return NoticesHtmlBuilder.create(context).setShowFullLicenseText(showFullLicenseText).setEnableLink(enableLink).setNotices(notices).setStyle(style).build();
         } catch (final Exception e) {
             throw new IllegalStateException(e);
         }
@@ -244,6 +245,7 @@ public class LicensesDialog {
         private String mNoticesText;
         private String mNoticesStyle;
         private boolean mShowFullLicenseText;
+        private boolean mEnableLink;
         private boolean mIncludeOwnLicense;
         private int mThemeResourceId;
         private int mDividerColor;
@@ -254,6 +256,7 @@ public class LicensesDialog {
             mCloseText = context.getString(R.string.notices_close);
             mNoticesStyle = context.getString(R.string.notices_default_style);
             mShowFullLicenseText = false;
+            mEnableLink = true;
             mIncludeOwnLicense = false;
             mThemeResourceId = 0;
             mDividerColor = 0;
@@ -317,6 +320,12 @@ public class LicensesDialog {
             return this;
         }
 
+        public Builder setEnableLink(final boolean enableLink) {
+            mEnableLink = enableLink;
+            ;
+            return this;
+        }
+
         public Builder setIncludeOwnLicense(final boolean includeOwnLicense) {
             mIncludeOwnLicense = includeOwnLicense;
             return this;
@@ -340,10 +349,10 @@ public class LicensesDialog {
         public LicensesDialog build() {
             final String licensesText;
             if (mNotices != null) {
-                licensesText = getLicensesText(mContext, mNotices, mShowFullLicenseText, mIncludeOwnLicense, mNoticesStyle);
+                licensesText = getLicensesText(mContext, mNotices, mShowFullLicenseText, mEnableLink, mIncludeOwnLicense, mNoticesStyle);
             } else if (mRawNoticesId != null) {
-                licensesText = getLicensesText(mContext, getNotices(mContext, mRawNoticesId), mShowFullLicenseText, mIncludeOwnLicense,
-                    mNoticesStyle);
+                licensesText = getLicensesText(mContext, getNotices(mContext, mRawNoticesId), mShowFullLicenseText, mEnableLink, mIncludeOwnLicense,
+                        mNoticesStyle);
             } else if (mNoticesText != null) {
                 licensesText = mNoticesText;
             } else {
